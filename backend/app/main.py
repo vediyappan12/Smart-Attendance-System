@@ -36,6 +36,20 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+
+@app.get("/")
+def home() -> dict[str, str]:
+    return {
+        "status": "success",
+        "message": "Smart Attendance System is running",
+    }
+
+
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 app.include_router(employees.router)
 app.include_router(attendance.router)
 app.include_router(reports.router)
