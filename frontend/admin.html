@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6fb">
+  <title>Attendly | Admin attendance management</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/admin" aria-label="Attendly admin panel">
+        <span class="brand-mark">A</span>
+        <span>attendly<span class="brand-period">.</span></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <a class="nav-item" href="/"><span class="nav-icon">⌂</span> Employee kiosk</a>
+        <a class="nav-item active" href="#overview"><span class="nav-icon">▦</span> Overview</a>
+        <a class="nav-item" href="#attendance"><span class="nav-icon">◷</span> Attendance</a>
+        <a class="nav-item" href="#people"><span class="nav-icon">♙</span> People</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-note">
+          <span class="privacy-icon">◈</span>
+          <strong>Privacy first</strong>
+          <p>Face verification is optional and only enabled with recorded consent.</p>
+        </div>
+        <button id="settingsButton" class="settings-button" type="button">
+          <span class="avatar">AD</span>
+          <span class="account-copy"><strong>Administrator</strong><small>Workspace settings</small></span>
+          <span class="settings-dots">···</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb">Workspace <span>/</span> Overview</div>
+        <div class="topbar-actions">
+          <span class="today-label" id="todayLabel"></span>
+          <span class="connection-pill"><span></span> <span id="connectionText">Connecting</span></span>
+        </div>
+      </header>
+
+      <section class="page-heading" id="overview">
+        <div>
+          <p class="eyebrow">ATTENDANCE MANAGEMENT</p>
+          <h1>Good day<span class="heading-period">.</span></h1>
+          <p class="subheading">Here’s what’s happening with your team today.</p>
+        </div>
+        <button class="button button-primary" id="addEmployeeButton" type="button"><span>＋</span> Add employee</button>
+      </section>
+
+      <section class="stats-grid" aria-label="Today's attendance summary">
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-label">Active employees</span><span class="stat-icon icon-blue">♙</span></div>
+          <div class="stat-number" id="statEmployees">—</div>
+          <div class="stat-caption">Registered in workspace</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-label">Present today</span><span class="stat-icon icon-green">✓</span></div>
+          <div class="stat-number" id="statPresent">—</div>
+          <div class="stat-caption">Attendance recorded</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-label">Late arrivals</span><span class="stat-icon icon-amber">◷</span></div>
+          <div class="stat-number" id="statLate">—</div>
+          <div class="stat-caption">After grace period</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-label">Anomalies</span><span class="stat-icon icon-red">!</span></div>
+          <div class="stat-number" id="statAnomalies">—</div>
+          <div class="stat-caption">Needs a closer look</div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel checkin-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">QUICK ACTION</p><h2>Record attendance</h2></div>
+            <span class="live-indicator"><span></span> Ready</span>
+          </div>
+          <p class="panel-description">Look up an employee and record today’s check-in or check-out.</p>
+          <label class="field-label" for="attendanceEmployee">Employee</label>
+          <select id="attendanceEmployee" class="form-control">
+            <option value="">Load employees to get started</option>
+          </select>
+          <div class="camera-box" id="cameraBox">
+            <video id="webcam" autoplay muted playsinline aria-label="Camera preview"></video>
+            <div class="camera-placeholder" id="cameraPlaceholder">
+              <span class="camera-symbol">▣</span>
+              <span>Camera is off</span>
+              <small>Face verification is only used for employees with consent.</small>
+            </div>
+          </div>
+          <canvas id="canvas" hidden></canvas>
+          <div class="camera-controls">
+            <button class="button button-quiet button-small" id="cameraButton" type="button">Enable camera</button>
+            <button class="button button-quiet button-small" id="enrollFaceButton" type="button" hidden>Enroll face</button>
+            <label id="manualOverrideControl" class="manual-override" hidden><input id="manualOverride" type="checkbox"> Admin override</label>
+            <span class="camera-hint">Camera is optional</span>
+          </div>
+          <div class="action-row">
+            <button class="button button-primary grow" id="checkinButton" type="button">Check in</button>
+            <button class="button button-outline grow" id="checkoutButton" type="button">Check out</button>
+          </div>
+          <p class="form-message" id="attendanceMessage" role="status"></p>
+        </article>
+
+        <article class="panel activity-panel" id="attendance">
+          <div class="panel-heading activity-heading">
+            <div><p class="eyebrow">LIVE MONITOR</p><h2>Recent activity</h2></div>
+            <button class="button button-quiet button-small" id="refreshButton" type="button">↻ Refresh</button>
+          </div>
+          <div class="activity-list" id="activityList">
+            <div class="empty-state">Connect to your API to load attendance activity.</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel report-panel" id="people">
+        <div class="panel-heading report-heading">
+          <div><p class="eyebrow">WORKFORCE</p><h2>Attendance records</h2></div>
+          <div class="report-actions">
+            <label class="sr-only" for="startDate">From date</label>
+            <input class="form-control date-control" id="startDate" type="date">
+            <span class="date-divider">to</span>
+            <label class="sr-only" for="endDate">To date</label>
+            <input class="form-control date-control" id="endDate" type="date">
+            <label class="check-filter"><input id="anomaliesOnly" type="checkbox"> Anomalies</label>
+            <button class="button button-outline button-small" id="exportButton" type="button">↓ Export CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>EMPLOYEE</th><th>DEPARTMENT</th><th>DATE &amp; TIME</th><th>CHECK-OUT</th><th>STATUS</th><th>ANOMALY</th><th>ADMIN ACTIONS</th></tr></thead>
+            <tbody id="reportTableBody"><tr><td colspan="7" class="table-empty">No attendance records loaded.</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span id="recordCount">0 records</span><span>Times shown in your browser’s local timezone</span></div>
+      </section>
+      <footer class="footer">Attendly <span>·</span> Smart attendance, thoughtfully managed.</footer>
+    </main>
+  </div>
+
+  <dialog id="employeeDialog" class="dialog">
+    <form id="employeeForm" class="dialog-card">
+      <div class="dialog-heading"><div><p class="eyebrow">NEW PROFILE</p><h2>Add an employee</h2></div><button type="button" class="dialog-close" data-close="employeeDialog" aria-label="Close">×</button></div>
+      <label class="field-label" for="employeeCode">Employee code</label>
+      <input id="employeeCode" class="form-control" required maxlength="50" pattern="[A-Za-z0-9_-]+" placeholder="e.g. EMP-104">
+      <label class="field-label" for="employeeName">Full name</label>
+      <input id="employeeName" class="form-control" required maxlength="100" placeholder="Full name">
+      <label class="field-label" for="employeeEmail">Work email</label>
+      <input id="employeeEmail" class="form-control" required type="email" maxlength="254" placeholder="name@company.com">
+      <label class="field-label" for="employeeDepartment">Department</label>
+      <input id="employeeDepartment" class="form-control" required maxlength="80" placeholder="e.g. Operations">
+      <label class="consent-control"><input id="biometricConsent" type="checkbox"><span><strong>Optional face verification</strong><small>I have obtained this employee’s explicit consent to process a face template for attendance. The image is discarded and the template is encrypted.</small></span></label>
+      <p class="dialog-message" id="employeeMessage" role="status"></p>
+      <div class="dialog-actions"><button type="button" class="button button-outline" data-close="employeeDialog">Cancel</button><button class="button button-primary" type="submit">Create employee</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="attendanceEditDialog" class="dialog">
+    <form id="attendanceEditForm" class="dialog-card">
+      <div class="dialog-heading"><div><p class="eyebrow">ADMIN RECORD CONTROL</p><h2>Edit attendance record</h2></div><button type="button" class="dialog-close" data-close="attendanceEditDialog" aria-label="Close">×</button></div>
+      <input id="editRecordId" type="hidden">
+      <label class="field-label" for="editCheckIn">Check-in</label>
+      <input id="editCheckIn" class="form-control" type="datetime-local" required>
+      <label class="field-label" for="editCheckOut">Check-out</label>
+      <input id="editCheckOut" class="form-control" type="datetime-local">
+      <label class="field-label" for="editStatus">Attendance status</label>
+      <select id="editStatus" class="form-control"><option>PRESENT</option><option>LATE</option><option>HALF_DAY</option><option>ABSENT</option></select>
+      <label class="consent-control"><input id="editAnomalyFlag" type="checkbox"><span><strong>Flag this record as an anomaly</strong><small>Use notes to explain any manual correction.</small></span></label>
+      <label class="field-label" for="editAnomalyReason">Anomaly type</label>
+      <select id="editAnomalyReason" class="form-control"><option>NONE</option><option>GEO_MISMATCH</option><option>RAPID_REENTRY</option><option>AFTER_HOURS</option><option>MULTIPLE_FACES</option></select>
+      <label class="field-label" for="editAnomalyNotes">Admin notes</label>
+      <textarea id="editAnomalyNotes" class="form-control" rows="3" maxlength="2000"></textarea>
+      <p class="dialog-message" id="attendanceEditMessage" role="status"></p>
+      <div class="dialog-actions"><button type="button" class="button button-outline" data-close="attendanceEditDialog">Cancel</button><button class="button button-primary" type="submit">Save changes</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="dialog">
+    <form id="settingsForm" class="dialog-card">
+      <div class="dialog-heading"><div><p class="eyebrow">CONNECTION</p><h2>Workspace settings</h2></div><button type="button" class="dialog-close" data-close="settingsDialog" aria-label="Close">×</button></div>
+      <p class="panel-description">Sign in with the administrator account configured in <code>backend/.env</code>. The session token stays in this browser tab.</p>
+      <label class="field-label" for="adminUsername">Admin username</label>
+      <input id="adminUsername" class="form-control" autocomplete="username" required placeholder="Admin username" value="admin">
+      <label class="field-label" for="adminPassword">Admin password</label>
+      <input id="adminPassword" class="form-control" type="password" autocomplete="current-password" required placeholder="Admin password">
+      <label class="field-label" for="apiUrlInput">API address</label>
+      <input id="apiUrlInput" class="form-control" type="url" placeholder="http://localhost:8000/api">
+      <p class="dialog-message" id="settingsMessage" role="status"></p>
+      <div class="dialog-actions"><button type="button" class="button button-outline" id="disconnectButton">Sign out</button><button class="button button-primary" type="submit">Sign in</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

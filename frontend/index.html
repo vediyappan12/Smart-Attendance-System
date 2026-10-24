@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6fb">
+  <title>Attendly | Employee kiosk</title>
+  <link rel="stylesheet" href="/kiosk.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="kiosk-header">
+    <a class="brand" href="/"><span class="brand-mark">A</span><span>attendly<span class="brand-period">.</span></span></a>
+    <a class="admin-link" href="/admin">Admin panel <span>↗</span></a>
+  </header>
+  <main class="kiosk-main">
+    <section class="intro">
+      <p class="eyebrow">EMPLOYEE SELF-SERVICE</p>
+      <h1>Attendance, made simple<span>.</span></h1>
+      <p>Register once with your face, then use a quick face scan for daily check-in and check-out.</p>
+      <p class="face-readiness" id="faceReadiness" role="status" hidden></p>
+    </section>
+
+    <section class="kiosk-grid">
+      <article class="kiosk-card">
+        <div class="card-heading"><span class="step">01</span><div><h2>New employee?</h2><p>Create a profile and enroll your face.</p></div></div>
+        <form id="registrationForm">
+          <label for="fullName">Full name</label>
+          <input id="fullName" name="full_name" required maxlength="100" autocomplete="name" placeholder="Your full name">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@company.com">
+          <label for="department">Department</label>
+          <input id="department" name="department" required maxlength="80" placeholder="e.g. Operations">
+          <label class="consent"><input id="consent" type="checkbox" required><span><strong>I consent to face verification for attendance.</strong><small>My face template is encrypted in the attendance database. The camera image is processed for enrollment and discarded, not stored. I can ask the administrator to delete my template.</small></span></label>
+          <button class="secondary-button" type="button" id="registrationCameraButton">Enable camera</button>
+          <button class="primary-button" type="submit" id="registerButton">Capture face &amp; register</button>
+          <p class="message" id="registrationMessage" role="status"></p>
+        </form>
+      </article>
+
+      <article class="kiosk-card attendance-card">
+        <div class="card-heading"><span class="step step-green">02</span><div><h2>Already registered?</h2><p>Enter your private employee code and verify your face.</p></div></div>
+        <form id="attendanceForm">
+          <label for="employeeCode">Employee code</label>
+          <input id="employeeCode" required maxlength="50" autocomplete="off" placeholder="e.g. ATT-73A1B2C3D4E5">
+          <div class="camera-frame" id="cameraFrame">
+            <video id="camera" autoplay muted playsinline aria-label="Live camera preview"></video>
+            <div class="camera-placeholder" id="cameraPlaceholder"><span>◉</span><strong>Camera is off</strong><small>Camera access is only used when you submit an action.</small></div>
+          </div>
+          <button class="secondary-button" type="button" id="cameraButton">Enable camera</button>
+          <div class="button-row">
+            <button class="primary-button" type="button" id="checkInButton">Check in</button>
+            <button class="outline-button" type="button" id="checkOutButton">Check out</button>
+          </div>
+          <p class="message" id="attendanceMessage" role="status"></p>
+        </form>
+      </article>
+    </section>
+
+    <section class="privacy"><span>◈</span><div><strong>Your biometric data stays private</strong><p>Only an encrypted mathematical face template is retained for matching. Attendance records and employee details are accessible only in the administrator panel.</p></div></section>
+    <footer>Open registration does not independently verify employment. Questions about your details or consent? Contact your attendance administrator.</footer>
+  </main>
+  <canvas id="captureCanvas" hidden></canvas>
+</body>
+</html>
