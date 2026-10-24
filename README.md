@@ -21,6 +21,22 @@ A full-stack attendance dashboard with a FastAPI API, MySQL persistence, employe
 
 ## Setup
 
+### Deploy to Vercel
+
+This project is a Python/FastAPI application with static HTML, CSS, and JavaScript; it is not a Next.js, Vite, or Create React App project. It intentionally has no `package.json` or JavaScript `build` script. The root `requirements.txt`, `api/index.py`, and `vercel.json` configure Vercel to install the Python dependencies, run the FastAPI app as a Python function, and route the kiosk, admin page, assets, and API requests to it.
+
+1. Import the repository into Vercel with the project root as the Root Directory.
+2. Add these environment variables in the Vercel project settings for the Production environment (and Preview too, if needed):
+   - `DATABASE_URL`: a managed, network-accessible MySQL connection URL, for example `mysql+pymysql://USER:PASSWORD@HOST:3306/DATABASE?charset=utf8mb4`. URL-encode reserved characters in credentials.
+   - `ADMIN_USERNAME`: a chosen administrator username.
+   - `ADMIN_PASSWORD`: a unique, strong administrator password.
+   - `ADMIN_API_KEY`: a unique, high-entropy secret used to sign admin sessions.
+   - `BIOMETRIC_ENCRYPTION_KEY`: a Fernet key generated with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. Keep the same key backed up securely; changing or losing it makes existing face templates unusable.
+   - `CORS_ORIGINS`: only needed if the frontend and API use different origins; list the exact trusted origins separated by commas.
+3. Deploy, then check `/api/health`. A healthy response should report `"database":"connected"`. Sign in at `/admin`.
+
+Do not copy local `.env` files, passwords, signing keys, or biometric keys into source control. Use Vercel’s environment-variable settings. Do not use SQLite for deployment: serverless filesystems are ephemeral, so use a managed database. The optional `face_recognition` package is not in the standard requirements and face enrollment will remain unavailable unless its native dependencies are separately supported by the deployment runtime. Do not enable biometric enrollment on a deployment that cannot securely support it.
+
 ### Quick start on Windows
 
 From the project root in PowerShell:
