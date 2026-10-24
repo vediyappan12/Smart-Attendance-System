@@ -1,1 +1,6 @@
--r backend/requirements.txt
+fastapi
+uvicorn
+pydantic
+opencv-python-headless
+numpy
+requests
